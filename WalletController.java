@@ -1,7 +1,7 @@
 public class WalletController {
 
-    public boolean register(String email, String password) {
-        User user = UserFactory.createUser(email, password);
+    public boolean register(String username, String email, String password) {
+        User user = UserFactory.createUser(username, email, password);
         return UserStore.addUser(user);
     }
 
@@ -11,36 +11,50 @@ public class WalletController {
 
     public void addMoney(EWallet wallet, float amount) {
         wallet.addMoney(amount);
-        TransactionStore.addTransaction(new Transaction("Added", amount));
 
         User user = SessionManager.getInstance().getCurrentUser();
+        TransactionStore.addTransaction(new Transaction("ADDED", amount, null, user.getEmail()));
         UserStore.updateBalance(user.getEmail(), user.getWallet().getBalance());
     }
 
-    // ✅ Strategy + Observer Pattern used here
-    public boolean sendMoney(EWallet sender, EWallet receiver, float amount) {
+    public boolean sendMoney(User senderUser, User receiverUser, float amount) {
+        PaymentStrategy strategy = new WalletPayment();
+        boolean success = strategy.pay(senderUser.getWallet(), receiverUser.getWallet(), amount);
 
-    PaymentStrategy strategy = new WalletPayment();
+        if (!success) {
+            return false;
+        }
 
-    boolean success = strategy.pay(sender, receiver, amount);
+        String receiverName = getDisplayName(receiverUser);
+        String senderName = getDisplayName(senderUser);
 
-    if (success) {
-        TransactionStore.addTransaction(new Transaction("Sent", amount));
+        TransactionStore.addTransaction(
+                new Transaction("SENT", amount, receiverName, senderUser.getEmail())
+        );
+        TransactionStore.addTransaction(
+                new Transaction("RECEIVED", amount, senderName, receiverUser.getEmail())
+        );
 
-        // ✅ update DB BEFORE return
-        User senderUser = SessionManager.getInstance().getCurrentUser();
-        UserStore.updateBalance(senderUser.getEmail(), sender.getBalance());
-
-        // ✅ Observer (if present)
-        WalletNotifier notifier = new WalletNotifier();
-        notifier.addObserver(new UserNotification());
-        notifier.notifyObservers("Money received successfully: ₹" + amount);
+        UserStore.updateBalance(senderUser.getEmail(), senderUser.getWallet().getBalance());
+        UserStore.updateBalance(receiverUser.getEmail(), receiverUser.getWallet().getBalance());
+        queueRecipientNotification(senderUser, receiverUser, amount);
+        return true;
     }
 
-    return success;   // ✅ must be LAST line
+    public void queueRecipientNotification(User senderUser, User receiverUser, float amount) {
+        String senderName = getDisplayName(senderUser);
+        NotificationStore.addNotification(
+                receiverUser.getEmail(),
+                "You received Rs." + amount + " from " + senderName + " successfully."
+        );
     }
 
     public float getBalance(EWallet wallet) {
         return wallet.getBalance();
+    }
+
+    public String getDisplayName(User user) {
+        String username = user.getUsername() != null ? user.getUsername().trim() : "";
+        return !username.isEmpty() ? username : user.getEmail();
     }
 }

@@ -7,6 +7,10 @@ public class WalletPayment implements PaymentStrategy {
             return false;
         }
 
+        if (amount > PaymentRules.getMaxLimit()) {
+            return false;
+        }
+
         if (sender.getBalance() >= amount) {
             sender.sendMoney(amount);
             receiver.addMoney(amount);

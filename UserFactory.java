@@ -1,12 +1,14 @@
 public class UserFactory {
 
-    // create normal user
-    public static User createUser(String email, String password) {
-        return new User(email, password, "USER");
+    public static User createUser(String username, String email, String password) {
+        return new User(username, email, password, "USER");
     }
 
-    // create admin user
-    public static User createAdmin(String email, String password) {
-        return new User(email, password, "ADMIN");
+    public static User createAdmin(String username, String email, String password) {
+        return new Admin(username, email, password);
+    }
+
+    public static User createMerchant(String username, String email, String password) {
+        return new User(username, email, password, "MERCHANT");
     }
 }

@@ -1,0 +1,13 @@
+# Ignore Java build artifacts
+*.class
+*.jar
+
+# IDE and OS files
+*.iml
+*.idea/
+*.DS_Store
+*~
+
+# Build directories
+out/
+build/
