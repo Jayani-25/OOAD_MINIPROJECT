@@ -28,7 +28,8 @@ public class RegisterUI extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(CARD_BG);
         card.setBorder(new EmptyBorder(24, 28, 24, 28));
-        card.setPreferredSize(new Dimension(360, 460));
+        card.setPreferredSize(new Dimension(360, 500));
+        card.setMaximumSize(new Dimension(360, 500));
 
         JButton backButton = createBackButton("Back");
         backButton.addActionListener(e -> app.showLogin(false));

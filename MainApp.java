@@ -54,7 +54,7 @@ public class MainApp {
     }
 
     public void showRegister() {
-        frame.setSize(480, 520);
+        frame.setSize(480, 580);
         frame.setLocationRelativeTo(null);
         registerUI.resetForm();
         rootLayout.show(rootPanel, REGISTER);
